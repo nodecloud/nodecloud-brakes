@@ -1,0 +1,37 @@
+{
+  "name": "cloud-client",
+  "version": "0.0.1",
+  "description": "An http client with loadbalance and circuit.",
+  "main": "build/CloudClient.js",
+  "scripts": {
+    "build": "babel src -d build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/node-cloud/cloud-client.git"
+  },
+  "keywords": [
+    "consul",
+    "http-client",
+    "loadbanance",
+    "circuit",
+    "brakes",
+    "node-consul"
+  ],
+  "author": "miaowing <i@zfeng.net>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/node-cloud/cloud-client/issues"
+  },
+  "homepage": "https://github.com/node-cloud/cloud-client#readme",
+  "dependencies": {
+    "brakes": "git+https://github.com/node-cloud/brakes.git",
+    "loadbalance": "git+https://github.com/node-cloud/node-loadbalance.git",
+    "request": "^2.81.0",
+    "request-promise": "^4.2.0"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.24.1"
+  }
+}
