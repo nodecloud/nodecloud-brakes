@@ -1,6 +1,19 @@
-import Brakes from 'brakes';
+'use strict';
 
-import Logger from './Logger';
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.getBrakes = getBrakes;
+
+var _brakes = require('brakes');
+
+var _brakes2 = _interopRequireDefault(_brakes);
+
+var _Logger = require('./Logger');
+
+var _Logger2 = _interopRequireDefault(_Logger);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /**
  * Get a brakes.
@@ -9,10 +22,10 @@ import Logger from './Logger';
  * @param options
  * @return {*|Brakes}
  */
-export function getBrakes(name, options = {}) {
-    const logger = new Logger(options.logger);
+function getBrakes(name, options = {}) {
+    const logger = new _Logger2.default(options.logger);
 
-    let brake = new Brakes({
+    let brake = new _brakes2.default({
         name: name,
         statInterval: options.statInterval || 2500,
         threshold: options.threshold || 0.5,
