@@ -94,3 +94,4 @@ class CloudClient {
     }
 }
 exports.default = CloudClient;
+module.exports = exports['default'];
