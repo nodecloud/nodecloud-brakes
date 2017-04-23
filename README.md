@@ -70,7 +70,6 @@ The key-value object for sending request.
 
 ##### options
 
-* strategy: Default is random. others are 'round_robin_engine', 'priority_engine'.
 * logger: Default is console. you can use any other logger that implements logger.log function.
 
 ### cClient.setHealthCheck(callback)
