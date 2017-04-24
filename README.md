@@ -71,6 +71,7 @@ The key-value object for sending request.
 ##### options
 
 * logger: Default is console. you can use any other logger that implements logger.log function.
+* Other options param is the same as [brakes](https://github.com/node-cloud/brakes)
 
 ### cClient.setHealthCheck(callback)
 
