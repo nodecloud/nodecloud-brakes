@@ -4,12 +4,9 @@
       "env",
       {
         "targets": {
-          "node": true
+          "node": 6.6
         }
       }
     ]
-  ],
-  "plugins": [
-    "add-module-exports"
   ]
 }

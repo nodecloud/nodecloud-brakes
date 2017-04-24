@@ -17,4 +17,3 @@ class ExternalException extends _Exception2.default {
     }
 }
 exports.default = ExternalException;
-module.exports = exports['default'];

@@ -62,4 +62,3 @@ class Logger {
     }
 }
 exports.default = Logger;
-module.exports = exports['default'];

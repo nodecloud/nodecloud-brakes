@@ -19,4 +19,3 @@ class Exception {
     }
 }
 exports.default = Exception;
-module.exports = exports['default'];

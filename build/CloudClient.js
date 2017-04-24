@@ -24,6 +24,8 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
+
 /**
  * An proxy client with load balance and circuit.
  */
@@ -65,17 +67,23 @@ class CloudClient {
 
             this.logger.info(`Register the http api '${key}' to feign client.`);
 
-            exports[key] = async (...params) => {
-                const response = await circuit.exec(...params);
-                if (response.statusCode < 300) {
-                    return response.body;
-                } else {
-                    let body = response.body || {};
+            exports[key] = (() => {
+                var _ref = _asyncToGenerator(function* (...params) {
+                    const response = yield circuit.exec(...params);
+                    if (response.statusCode < 300) {
+                        return response.body;
+                    } else {
+                        let body = response.body || {};
 
-                    // if body.message is exist, throw body.message or throw body.
-                    throw new _Exception2.default(body.id, body.message || body, null, response.statusCode);
-                }
-            };
+                        // if body.message is exist, throw body.message or throw body.
+                        throw new _Exception2.default(body.id, body.message || body, null, response.statusCode);
+                    }
+                });
+
+                return function () {
+                    return _ref.apply(this, arguments);
+                };
+            })();
         }
 
         return exports;
@@ -94,4 +102,3 @@ class CloudClient {
     }
 }
 exports.default = CloudClient;
-module.exports = exports['default'];
