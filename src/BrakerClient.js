@@ -6,12 +6,11 @@ import ExternalException from './ExternalException'
 /**
  * An proxy client with load balance and circuit.
  */
-export default class CloudClient {
-    constructor(serviceName, clientInterface, options) {
+export default class BrakerClient {
+    constructor(serviceName, options) {
         this.options = options = options || {};
         this.logger = new Logger(options.logger);
         this.serviceName = serviceName;
-        this.clientInterface = clientInterface;
         this.brake = Brakes.getBrakes(serviceName, options);
     }
 
@@ -27,37 +26,47 @@ export default class CloudClient {
         });
     }
 
-    /**
-     * Register the http api to this client.
-     *
-     * @return {{}}
-     */
-    registerApi() {
+    register(clientInterface) {
         let exports = {};
-        for (let key in this.clientInterface) {
-            if (!this.clientInterface.hasOwnProperty(key)) {
+        for (let key in clientInterface) {
+            if (!clientInterface.hasOwnProperty(key)) {
                 continue;
             }
 
-            const func = this.clientInterface[key];
+            const func = clientInterface[key];
             const circuit = this.brake.slaveCircuit(func, this.fallback.bind(this));
 
-            this.logger.info(`Register the http api '${key}' to feign client.`);
+            this.logger.info(`Register the http api '${key}' to cloud client.`);
 
-            exports[key] = async (...params) => {
-                const response = await circuit.exec(...params);
-                if (response.statusCode < 300) {
-                    return response.body;
-                } else {
-                    let body = response.body || {};
+            exports[key] = {
+                id: '',
+                circuit: circuit,
+                exec: async (...params) => {
+                    const response = await circuit.exec(...params);
+                    if (response.statusCode < 300) {
+                        return response.body;
+                    } else {
+                        let body = response.body || {};
 
-                    // if body.message is exist, throw body.message or throw body.
-                    throw new Exception(body.id, body.message || body, null, response.statusCode);
+                        //If body.message is exist, throw body.message or throw body.
+                        throw new Exception(body.id, body.message || body, null, response.statusCode);
+                    }
                 }
             }
         }
 
         return exports;
+    }
+
+    /**
+     * Register the http api to this client.
+     *
+     * @return {*}
+     */
+    registerApi(clientInterface) {
+        let exports = this.register(clientInterface);
+
+        return exports.map(item => item.exec);
     }
 
     /**

@@ -1,8 +1,8 @@
 {
-  "name": "cloud-client",
+  "name": "braker-client",
   "version": "0.0.1",
-  "description": "An http client with loadbalance and circuit.",
-  "main": "build/CloudClient.js",
+  "description": "An client with circuit.",
+  "main": "build/BrakerClient.js",
   "scripts": {
     "build": "babel src -d build",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -12,12 +12,9 @@
     "url": "git+https://github.com/node-cloud/cloud-client.git"
   },
   "keywords": [
-    "consul",
-    "http-client",
-    "loadbanance",
     "circuit",
     "brakes",
-    "node-consul"
+    "node-cloud"
   ],
   "author": "miaowing <i@zfeng.net>",
   "license": "MIT",
