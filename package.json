@@ -1,5 +1,5 @@
 {
-  "name": "braker-client",
+  "name": "brake-client",
   "version": "0.0.1",
   "description": "An client with circuit.",
   "main": "build/BrakerClient.js",
