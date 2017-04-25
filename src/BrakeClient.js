@@ -64,9 +64,16 @@ export default class BrakerClient {
      * @return {*}
      */
     registerApi(clientInterface) {
-        let exports = this.register(clientInterface);
+        let exports = {};
+        let wrappers = this.register(clientInterface);
+        for (let key in wrappers) {
+            if (!wrappers.hasOwnProperty(key)) {
+                continue;
+            }
+            exports[key] = wrappers[key].exec;
+        }
 
-        return exports.map(item => item.exec);
+        return exports;
     }
 
     /**
