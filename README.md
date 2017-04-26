@@ -4,18 +4,18 @@
 
 ### ResourceClient
 ``` javascript
-import CloudClient from 'cloud-client';
+import BrakeClient from 'brake-client';
 
 import * as resourceInterface from './ResourceInterface';
 
 const SERVICE_NAME = 'a-service';
-const cClient = new CloudClient(SERVICE_NAME, resourceInterface);
+const brake = new BrakeClient(SERVICE_NAME);
 
 //set health check.
-cClient.setHealthCheck(resourceInterface.checkHealth);
+brake.setHealthCheck(resourceInterface.checkHealth);
 
 //register http request api.
-export default cClient.registerApi();
+export default brake.registerApi(resourceInterface);
 ```
 
 ### ResourceInterface
@@ -48,7 +48,7 @@ export function getResource(id) {
 }
 ```
 
-You can use cloud client to invoke resource interface's function. example is
+You can use brake client to invoke resource interface's function. example is
 
 ``` javascript
 import resourceClient from './ResourceClient';
@@ -58,25 +58,23 @@ resourceClient.getResource(id);
 
 ## API
 
-### new CloudClient(serviceName, interface, options)
+### new CloudClient(serviceName, options)
 
 ##### serviceName
 
 The service name.
-
-##### interface
-
-The key-value object for sending request.
 
 ##### options
 
 * logger: Default is console. you can use any other logger that implements logger.log function.
 * Other options param is the same as [brakes](https://github.com/node-cloud/brakes)
 
-### cClient.setHealthCheck(callback)
+### brake.setHealthCheck(callback)
 
 Set a callback, when the circuit is open, the callback will be used for checking the service's health status, if the status is ok, the circuit will close.
 
-### cClient.registerApi()
+### brake.registerApi(interface)
 
-return cClient.registerApi();
+##### interface
+
+The key-value object for sending request.
