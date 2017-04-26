@@ -43,7 +43,7 @@ export default class BrakerClient {
                 circuit: circuit,
                 exec: async (...params) => {
                     const response = await circuit.exec(...params);
-                    responseHandler && responseHandler(response);
+                    return responseHandler(response);
                 }
             }
         }

@@ -61,7 +61,7 @@ class BrakerClient {
                 exec: (() => {
                     var _ref = _asyncToGenerator(function* (...params) {
                         const response = yield circuit.exec(...params);
-                        responseHandler && responseHandler(response);
+                        return responseHandler(response);
                     });
 
                     return function exec() {
