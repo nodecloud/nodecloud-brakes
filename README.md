@@ -80,19 +80,19 @@ The service name.
 
 Set a callback, when the circuit is open, the callback will be used for checking the service's health status, if the status is ok, the circuit will close.
 
-### brake.registerApi(interface, responseHandlers)
+### brake.registerApi(interface, handlers)
 
 ##### interface
 
 The key-value object for sending request.
 
-##### responseHandlers
+##### handlers
 
-* responseHandlers.preRequest(...params)
+* handlers.preRequest(...params)
 
-* responseHandlers.postRequest(err, response)
+* handlers.postRequest(err, response)
 
-* responseHandlers.postCircuit(response)
+* handlers.postCircuit(response)
 
 ### brake.on(eventName, callback)
 

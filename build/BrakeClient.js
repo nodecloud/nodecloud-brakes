@@ -41,8 +41,8 @@ class BrakerClient {
         this.brake.on(eventName, callback);
     }
 
-    register(clientInterface, responseHandlers) {
-        responseHandlers = responseHandlers || {};
+    register(clientInterface, handlers) {
+        handlers = handlers || {};
 
         let exports = {};
         for (let key in clientInterface) {
@@ -53,8 +53,8 @@ class BrakerClient {
             const func = clientInterface[key];
             const circuit = this.brake.slaveCircuit((() => {
                 var _ref = _asyncToGenerator(function* (...params) {
-                    if (responseHandlers.preRequest) {
-                        responseHandlers.preRequest(...params);
+                    if (handlers.preRequest) {
+                        handlers.preRequest(...params);
                     }
 
                     let response, err;
@@ -64,8 +64,8 @@ class BrakerClient {
                         err = e;
                     }
 
-                    if (responseHandlers.postRequest) {
-                        return responseHandlers.postRequest(err, response);
+                    if (handlers.postRequest) {
+                        return handlers.postRequest(err, response);
                     }
 
                     throw err;
@@ -82,8 +82,8 @@ class BrakerClient {
                 exec: (() => {
                     var _ref2 = _asyncToGenerator(function* (...params) {
                         const response = yield circuit.exec(...params);
-                        if (responseHandlers.postCircuit) {
-                            return responseHandlers.postCircuit(response);
+                        if (handlers.postCircuit) {
+                            return handlers.postCircuit(response);
                         }
 
                         return response;
@@ -103,12 +103,12 @@ class BrakerClient {
      * Register the http api to this client.
      *
      * @param clientInterface
-     * @param responseHandler
+     * @param handlers
      * @return {*}
      */
-    registerApi(clientInterface, responseHandler) {
+    registerApi(clientInterface, handlers) {
         let exports = {};
-        let wrappers = this.register(clientInterface, responseHandler);
+        let wrappers = this.register(clientInterface, handlers);
         for (let key in wrappers) {
             if (!wrappers.hasOwnProperty(key)) {
                 continue;
