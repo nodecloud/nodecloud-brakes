@@ -36,7 +36,7 @@ export default class BrakerClient {
             const func = clientInterface[key];
             const circuit = this.brake.slaveCircuit(async function (...params) {
                 if (handlers.preRequest) {
-                    handlers.preRequest(...params);
+                    await handlers.preRequest(...params);
                 }
 
                 let response, err;
@@ -47,10 +47,14 @@ export default class BrakerClient {
                 }
 
                 if (handlers.postRequest) {
-                    return handlers.postRequest(err, response);
+                    return await handlers.postRequest(err, response);
                 }
 
-                throw err;
+                if (err) {
+                    throw err;
+                }
+
+                return response;
             }, this.fallback.bind(this));
 
             exports[key] = {
@@ -59,7 +63,7 @@ export default class BrakerClient {
                 exec: async (...params) => {
                     const response = await circuit.exec(...params);
                     if (handlers.postCircuit) {
-                        return handlers.postCircuit(response);
+                        return await handlers.postCircuit(response);
                     }
 
                     return response;

@@ -54,7 +54,7 @@ class BrakerClient {
             const circuit = this.brake.slaveCircuit((() => {
                 var _ref = _asyncToGenerator(function* (...params) {
                     if (handlers.preRequest) {
-                        handlers.preRequest(...params);
+                        yield handlers.preRequest(...params);
                     }
 
                     let response, err;
@@ -65,10 +65,14 @@ class BrakerClient {
                     }
 
                     if (handlers.postRequest) {
-                        return handlers.postRequest(err, response);
+                        return yield handlers.postRequest(err, response);
                     }
 
-                    throw err;
+                    if (err) {
+                        throw err;
+                    }
+
+                    return response;
                 });
 
                 return function () {
@@ -83,7 +87,7 @@ class BrakerClient {
                     var _ref2 = _asyncToGenerator(function* (...params) {
                         const response = yield circuit.exec(...params);
                         if (handlers.postCircuit) {
-                            return handlers.postCircuit(response);
+                            return yield handlers.postCircuit(response);
                         }
 
                         return response;
