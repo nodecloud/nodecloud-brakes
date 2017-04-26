@@ -74,8 +74,7 @@ The service name.
 
 ##### options
 
-* logger: Default is console. you can use any other logger that implements logger.log function.
-* Other options param is the same as [brakes](https://github.com/node-cloud/brakes)
+* The options param is the same as [brakes](https://github.com/node-cloud/brakes)
 
 ### brake.setHealthCheck(callback)
 
@@ -86,6 +85,10 @@ Set a callback, when the circuit is open, the callback will be used for checking
 ##### interface
 
 The key-value object for sending request.
+
+##### responseHandler
+
+handle the response of interface.
 
 ### brake.on(eventName, callback)
 

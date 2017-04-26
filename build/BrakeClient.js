@@ -42,6 +42,10 @@ class BrakerClient {
     }
 
     register(clientInterface, responseHandler) {
+        if (!responseHandler || typeof responseHandler !== 'function') {
+            throw new Error('The response handler is required.');
+        }
+
         let exports = {};
         for (let key in clientInterface) {
             if (!clientInterface.hasOwnProperty(key)) {
@@ -66,6 +70,8 @@ class BrakerClient {
                 })()
             };
         }
+
+        return exports;
     }
 
     /**
