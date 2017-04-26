@@ -14,6 +14,14 @@ const brake = new BrakeClient(SERVICE_NAME);
 //set health check.
 brake.setHealthCheck(resourceInterface.checkHealth);
 
+brake.on('circuitOpen', () => {
+    logger.warn(`The service: ${SERVICE_NAME}'s circuit is opened.`);
+});
+
+brake.on('circuitClosed', () => {
+    logger.info(`The service: ${SERVICE_NAME}'s circuit is closed.`);
+});
+
 //register http request api.
 export default brake.registerApi(resourceInterface);
 ```
@@ -78,3 +86,7 @@ Set a callback, when the circuit is open, the callback will be used for checking
 ##### interface
 
 The key-value object for sending request.
+
+### brake.on(eventName, callback)
+
+See [brakes](https://github.com/node-cloud/brakes) for detail.

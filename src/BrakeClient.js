@@ -1,6 +1,4 @@
-import Logger from './Logger';
 import * as Brakes from './Brakes';
-import Exception from './Exception';
 import ExternalException from './ExternalException'
 
 /**
@@ -9,7 +7,6 @@ import ExternalException from './ExternalException'
 export default class BrakerClient {
     constructor(serviceName, options) {
         this.options = options = options || {};
-        this.logger = new Logger(options.logger);
         this.serviceName = serviceName;
         this.brake = Brakes.getBrakes(serviceName, options);
     }
@@ -21,6 +18,10 @@ export default class BrakerClient {
      */
     setHealthCheck(fn) {
         this.brake.healthCheck(fn);
+    }
+
+    on(eventName, callback) {
+        this.brake.on(eventName, callback);
     }
 
     register(clientInterface) {
