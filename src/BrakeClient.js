@@ -24,10 +24,8 @@ export default class BrakerClient {
         this.brake.on(eventName, callback);
     }
 
-    register(clientInterface, responseHandler) {
-        if (!responseHandler || typeof responseHandler !== 'function') {
-            throw new Error('The response handler is required.');
-        }
+    register(clientInterface, responseHandlers) {
+        responseHandlers = responseHandlers || {};
 
         let exports = {};
         for (let key in clientInterface) {
@@ -36,14 +34,35 @@ export default class BrakerClient {
             }
 
             const func = clientInterface[key];
-            const circuit = this.brake.slaveCircuit(func, this.fallback.bind(this));
+            const circuit = this.brake.slaveCircuit(async function (...params) {
+                if (responseHandlers.preRequest) {
+                    responseHandlers.preRequest(...params);
+                }
+
+                let response, err;
+                try {
+                    response = await func(...params);
+                } catch (e) {
+                    err = e;
+                }
+
+                if (responseHandlers.postRequest) {
+                    return responseHandlers.postRequest(err, response);
+                }
+
+                throw err;
+            }, this.fallback.bind(this));
 
             exports[key] = {
                 id: '',
                 circuit: circuit,
                 exec: async (...params) => {
                     const response = await circuit.exec(...params);
-                    return responseHandler(response);
+                    if (responseHandlers.postCircuit) {
+                        return responseHandlers.postCircuit(response);
+                    }
+
+                    return response;
                 }
             }
         }
