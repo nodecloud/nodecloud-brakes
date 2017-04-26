@@ -24,7 +24,7 @@ export default class BrakerClient {
         this.brake.on(eventName, callback);
     }
 
-    register(clientInterface) {
+    register(clientInterface, responseHandler) {
         let exports = {};
         for (let key in clientInterface) {
             if (!clientInterface.hasOwnProperty(key)) {
@@ -32,28 +32,17 @@ export default class BrakerClient {
             }
 
             const func = clientInterface[key];
-            const circuit = this.brake.slaveCircuit(async function () {
-                try {
-                    return await func();
-                } catch (e) {
-                    if (e.statusCode >= 500) {
-                        throw e;
-                    }
-
-                    return e.response;
-                }
-            }, this.fallback.bind(this));
+            const circuit = this.brake.slaveCircuit(func, this.fallback.bind(this));
 
             exports[key] = {
                 id: '',
                 circuit: circuit,
                 exec: async (...params) => {
-                    return await circuit.exec(...params);
+                    const response = await circuit.exec(...params);
+                    responseHandler && responseHandler(response);
                 }
             }
         }
-
-        return exports;
     }
 
     /**

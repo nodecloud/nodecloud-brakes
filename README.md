@@ -81,7 +81,7 @@ The service name.
 
 Set a callback, when the circuit is open, the callback will be used for checking the service's health status, if the status is ok, the circuit will close.
 
-### brake.registerApi(interface)
+### brake.registerApi(interface, responseHandler)
 
 ##### interface
 

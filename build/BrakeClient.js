@@ -41,7 +41,7 @@ class BrakerClient {
         this.brake.on(eventName, callback);
     }
 
-    register(clientInterface) {
+    register(clientInterface, responseHandler) {
         let exports = {};
         for (let key in clientInterface) {
             if (!clientInterface.hasOwnProperty(key)) {
@@ -49,34 +49,23 @@ class BrakerClient {
             }
 
             const func = clientInterface[key];
-            const circuit = this.brake.slaveCircuit(_asyncToGenerator(function* () {
-                try {
-                    return yield func();
-                } catch (e) {
-                    if (e.statusCode >= 500) {
-                        throw e;
-                    }
-
-                    return e.response;
-                }
-            }), this.fallback.bind(this));
+            const circuit = this.brake.slaveCircuit(func, this.fallback.bind(this));
 
             exports[key] = {
                 id: '',
                 circuit: circuit,
                 exec: (() => {
-                    var _ref2 = _asyncToGenerator(function* (...params) {
-                        return yield circuit.exec(...params);
+                    var _ref = _asyncToGenerator(function* (...params) {
+                        const response = yield circuit.exec(...params);
+                        responseHandler && responseHandler(response);
                     });
 
                     return function exec() {
-                        return _ref2.apply(this, arguments);
+                        return _ref.apply(this, arguments);
                     };
                 })()
             };
         }
-
-        return exports;
     }
 
     /**
