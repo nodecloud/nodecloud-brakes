@@ -71,11 +71,13 @@ class BrakerClient {
     /**
      * Register the http api to this client.
      *
+     * @param clientInterface
+     * @param responseHandler
      * @return {*}
      */
-    registerApi(clientInterface) {
+    registerApi(clientInterface, responseHandler) {
         let exports = {};
-        let wrappers = this.register(clientInterface);
+        let wrappers = this.register(clientInterface, responseHandler);
         for (let key in wrappers) {
             if (!wrappers.hasOwnProperty(key)) {
                 continue;
