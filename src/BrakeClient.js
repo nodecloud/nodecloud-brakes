@@ -8,6 +8,7 @@ export default class BrakeClient {
      * @param options.handler
      * @param options.handler.preHandle
      * @param options.handler.postHandle
+     * @param options.handler.postCircuit
      * @param options.group:               string to use for group of circuit. This is mostly used for reporting on stats.
      * @param options.bucketSpan:          time in ms that a specific bucket should remain active
      * @param options.statInterval:        interval in ms that brakes should emit a snapshot event
@@ -39,33 +40,42 @@ export default class BrakeClient {
      * @param options.handler
      * @param options.handler.preHandle
      * @param options.handler.postHandle
-     * @return {function(*=)}
+     * @param options.handler.postCircuit
+     * @return {{send: function}}
      */
     circuit(client, fallback, options = {}) {
-        return async request => {
-            const handler = options.handler || this.handler;
-            const circuit = this.brakes.slaveCircuit(async request => {
-                //pre handle request
-                if (handler && handler.preHandle) {
-                    request = handler.preHandle(request) || request;
-                }
+        return {
+            send: async request => {
+                const handler = options.handler || this.handler;
+                const circuit = this.brakes.slaveCircuit(async request => {
+                    //pre handle request
+                    if (handler && handler.preHandle) {
+                        request = handler.preHandle(request) || request;
+                    }
 
-                let err, response;
-                try {
-                    response = await client.send(request);
-                } catch (e) {
-                    err = e;
-                }
+                    let err, response;
+                    try {
+                        response = await client.send(request);
+                    } catch (e) {
+                        err = e;
+                    }
 
-                //post handle response
-                if (handler && handler.postHandle) {
-                    response = handler.postHandle(err, response) || response;
+                    //post handle response
+                    if (handler && handler.postHandle) {
+                        response = handler.postHandle(err, response) || response;
+                    }
+
+                    return response;
+                }, fallback, options);
+
+                let response = await circuit.exec(request);
+
+                if (handler && handler.postCircuit) {
+                    response = handler.postCircuit(response);
                 }
 
                 return response;
-            }, fallback, options);
-
-            return await circuit.exec(request);
+            }
         }
     }
 

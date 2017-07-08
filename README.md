@@ -21,9 +21,9 @@ brake.on('circuitClosed', () => {
     logger.info(`The service: ${SERVICE_NAME}'s circuit is closed.`);
 });
 
-function fallback(err) {
+brake.fallback(err => {
     throw new Error('Cannot invoke downstream service. please try again soon.', err);
-}
+});
 
 export function checkHealth() {
     return rp({
@@ -44,7 +44,7 @@ export function getResource(id) {
             'Content-Type': 'application/json'
         }
     };
-    return brake.circuit({send: rp}, fallback)(request);
+    return brake.circuit({send: rp}).send(request);
 }
 ```
 
@@ -72,6 +72,7 @@ The options param is the same as [brakes](https://github.com/node-cloud/brakes).
 We extend it, and support request handlers
 * options.handler.preHandle(request)
 * options.handler.postHandle(err, response)
+* options.handler.postCircuit(response);
 
 ### brake.healthCheck(callback)
 
@@ -85,7 +86,7 @@ See [brakes](https://github.com/node-cloud/brakes) for detail.
 
 Return the circuit's status.
 
-### brake.circuit(client, fallback, options)
+### brake.circuit(client, fallback, options) : {send(request)}
 
 * client: {send() {}}
 * fallback(err)
