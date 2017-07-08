@@ -11,7 +11,7 @@ const SERVICE_NAME = 'a-service';
 const brake = new BrakeClient(SERVICE_NAME);
 
 //set health check.
-brake.setHealthCheck(resourceInterface.checkHealth);
+brake.healthCheck(resourceInterface.checkHealth);
 
 brake.on('circuitOpen', () => {
     logger.warn(`The service: ${SERVICE_NAME}'s circuit is opened.`);
@@ -90,3 +90,5 @@ Return the circuit's status.
 * client: {send() {}}
 * fallback(err)
 * options the same as [brakes](https://github.com/node-cloud/brakes).
+
+### brake.fallback(callback)

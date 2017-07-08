@@ -69,6 +69,10 @@ export default class BrakeClient {
         }
     }
 
+    fallback(callback) {
+        return this.brakes.fallback(callback);
+    }
+
     healthCheck(callback) {
         return this.brakes.healthCheck(callback);
     }
