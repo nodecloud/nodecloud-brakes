@@ -4,9 +4,18 @@
       "env",
       {
         "targets": {
-          "node": 6.6
+          "node": "6.6"
         }
       }
     ]
-  ]
+  ],
+  "plugins": [
+    "transform-object-rest-spread",
+    "transform-decorators-legacy"
+  ],
+  "env": {
+    "development": {
+      "sourceMaps": "inline"
+    }
+  }
 }

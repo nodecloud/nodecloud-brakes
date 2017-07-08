@@ -5,8 +5,7 @@
 ### ResourceClient
 ``` javascript
 import BrakeClient from 'brake-client';
-
-import * as resourceInterface from './ResourceInterface';
+import rp from 'request-promise';
 
 const SERVICE_NAME = 'a-service';
 const brake = new BrakeClient(SERVICE_NAME);
@@ -22,18 +21,10 @@ brake.on('circuitClosed', () => {
     logger.info(`The service: ${SERVICE_NAME}'s circuit is closed.`);
 });
 
-//register http request api.
-export default brake.registerApi(resourceInterface);
-```
+function fallback(err) {
+    throw new Error('Cannot invoke downstream service. please try again soon.', err);
+}
 
-### ResourceInterface
-
-``` javascript
-import rp from 'request-promise';
-
-/**
- * Check the service's health status.
- */
 export function checkHealth() {
     return rp({
         method: 'get',
@@ -45,28 +36,31 @@ export function checkHealth() {
 }
 
 export function getResource(id) {
-    return rp({
+    const request = {
         method: 'get',
         url: `/${SERVICE_NAME}/v1/resources/:id`,
         params: {id: id},
         headers: {
             'Content-Type': 'application/json'
         }
-    });
+    };
+    return brake.circuit({send: rp}, fallback)(request);
 }
 ```
 
-You can use brake client to invoke resource interface's function. example is
+You can use brake client to invoke resource api. The example is
 
 ``` javascript
 import resourceClient from './ResourceClient';
 
-resourceClient.getResource(id);
+resourceClient.getResource(id).then(resource => {
+    console.log(resource);
+})
 ```
 
 ## API
 
-### new CloudClient(serviceName, options)
+### new BrakeClient(serviceName, options)
 
 ##### serviceName
 
@@ -74,26 +68,25 @@ The service name.
 
 ##### options
 
-* The options param is the same as [brakes](https://github.com/node-cloud/brakes)
+The options param is the same as [brakes](https://github.com/node-cloud/brakes).
+We extend it, and support request handlers
+* options.handler.preHandle(request)
+* options.handler.postHandle(err, response)
 
-### brake.setHealthCheck(callback)
+### brake.healthCheck(callback)
 
 Set a callback, when the circuit is open, the callback will be used for checking the service's health status, if the status is ok, the circuit will close.
-
-### brake.registerApi(interface, handlers)
-
-##### interface
-
-The key-value object for sending request.
-
-##### handlers
-
-* handlers.preRequest(...params)
-
-* handlers.postRequest(err, response)
-
-* handlers.postCircuit(response)
 
 ### brake.on(eventName, callback)
 
 See [brakes](https://github.com/node-cloud/brakes) for detail.
+
+### brake.isOpen()
+
+Return the circuit's status.
+
+### brake.circuit(client, fallback, options)
+
+* client: {send() {}}
+* fallback(err)
+* options the same as [brakes](https://github.com/node-cloud/brakes).

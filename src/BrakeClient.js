@@ -1,107 +1,97 @@
 import * as Brakes from './Brakes';
-import ExternalException from './ExternalException'
 
-/**
- * An proxy client with load balance and circuit.
- */
-export default class BrakerClient {
-    constructor(serviceName, options) {
-        this.options = options = options || {};
+export default class BrakeClient {
+    /**
+     *
+     * @param serviceName:                 string to use for name of circuit. This is mostly used for reporting on stats.
+     * @param options
+     * @param options.handler
+     * @param options.handler.preHandle
+     * @param options.handler.postHandle
+     * @param options.group:               string to use for group of circuit. This is mostly used for reporting on stats.
+     * @param options.bucketSpan:          time in ms that a specific bucket should remain active
+     * @param options.statInterval:        interval in ms that brakes should emit a snapshot event
+     * @param options.percentiles:         array<number> that defines the percentile levels that should be calculated on the stats object (i.e. 0.9 for 90th percentile)
+     * @param options.bucketNum:           # of buckets to retain in a rolling window
+     * @param options.circuitDuration:     time in ms that a circuit should remain broken
+     * @param options.waitThreshold:       number of requests to wait before testing circuit health
+     * @param options.threshold:           % threshold for successful calls. If the % of successful calls dips below this threshold the circuit will break
+     * @param options.timeout:             time in ms before a service call will timeout
+     * @param options.isFailure:           function that returns true if an error should be considered a failure (receives the error object returned by your command.) This allows for non-critical errors to be ignored by the circuit breaker
+     * @param options.healthCheckInterval: time in ms interval between each execution of health check function
+     * @param options.healthCheck:         function to call for the health check (can be defined also with calling healthCheck function)
+     * @param options.fallback:            function to call for fallback (can be defined also with calling fallback function)
+     * @param options.isPromise:           boolean to opt out of check for callback in function. This affects the passed in function, health check and fallback
+     * @param options.isFunction:          boolean to opt out of check for callback, always promisifying in function. This affects the passed in function, health check and fallback
+     */
+    constructor(serviceName, options = {}) {
         this.serviceName = serviceName;
-        this.brake = Brakes.getBrakes(serviceName, options);
+        this.options = options;
+        this.handler = options.handler;
+        this.brakes = Brakes.getBrakes(this.serviceName, this.options);
     }
 
     /**
-     * Set the circuit's health check callback.
      *
-     * @param fn
+     * @param client
+     * @param fallback
+     * @param options
+     * @param options.handler
+     * @param options.handler.preHandle
+     * @param options.handler.postHandle
+     * @return {function(*=)}
      */
-    setHealthCheck(fn) {
-        this.brake.healthCheck(fn);
-    }
-
-    on(eventName, callback) {
-        this.brake.on(eventName, callback);
-    }
-
-    register(clientInterface, handlers) {
-        handlers = handlers || {};
-
-        let exports = {};
-        for (let key in clientInterface) {
-            if (!clientInterface.hasOwnProperty(key)) {
-                continue;
-            }
-
-            const func = clientInterface[key];
-            const circuit = this.brake.slaveCircuit(async function (...params) {
-                if (handlers.preRequest) {
-                    await handlers.preRequest(...params);
+    circuit(client, fallback, options = {}) {
+        return async request => {
+            const handler = options.handler || this.handler;
+            const circuit = this.brakes.slaveCircuit(async request => {
+                //pre handle request
+                if (handler && handler.preHandle) {
+                    request = handler.preHandle(request) || request;
                 }
 
-                let response, err;
+                let err, response;
                 try {
-                    response = await func(...params);
+                    response = await client.send(request);
                 } catch (e) {
                     err = e;
                 }
 
-                if (handlers.postRequest) {
-                    return await handlers.postRequest(err, response);
-                }
-
-                if (err) {
-                    throw err;
+                //post handle response
+                if (handler && handler.postHandle) {
+                    response = handler.postHandle(err, response) || response;
                 }
 
                 return response;
-            }, this.fallback.bind(this));
+            }, fallback, options);
 
-            exports[key] = {
-                id: '',
-                circuit: circuit,
-                exec: async (...params) => {
-                    const response = await circuit.exec(...params);
-                    if (handlers.postCircuit) {
-                        return await handlers.postCircuit(response);
-                    }
-
-                    return response;
-                }
-            }
+            return await circuit.exec(request);
         }
+    }
 
-        return exports;
+    healthCheck(callback) {
+        return this.brakes.healthCheck(callback);
     }
 
     /**
-     * Register the http api to this client.
      *
-     * @param clientInterface
-     * @param handlers
+     * @param eventName
+     *      exec:              Event on request start
+     *      failure:           Event on request failure
+     *      success:           Event on request success
+     *      timeout:           Event on request timeout
+     *      circuitClosed:     Event fired when circuit is closed
+     *      circuitOpen:       Event fired when circuit is open
+     *      snapshot:          Event fired on stats snapshot
+     *      healthCheckFailed: Event fired on failure of each health check execution
+     * @param callback
      * @return {*}
      */
-    registerApi(clientInterface, handlers) {
-        let exports = {};
-        let wrappers = this.register(clientInterface, handlers);
-        for (let key in wrappers) {
-            if (!wrappers.hasOwnProperty(key)) {
-                continue;
-            }
-            exports[key] = wrappers[key].exec;
-        }
-
-        return exports;
+    on(eventName, callback) {
+        return this.brakes.on(eventName, callback);
     }
 
-    /**
-     * Circuit fallback method.
-     *
-     * @param err
-     * @param params
-     * @return {Promise.<*>}
-     */
-    fallback(err, ...params) {
-        return Promise.reject(new ExternalException('', 'Cannot invoke downstream service. please try again soon.', err));
+    isOpen() {
+        return this.brakes.isOpen();
     }
 }
