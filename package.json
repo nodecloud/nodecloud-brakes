@@ -1,6 +1,6 @@
 {
   "name": "brake-client",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "An client with circuit.",
   "main": "build/BrakeClient.js",
   "scripts": {

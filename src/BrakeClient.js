@@ -66,7 +66,9 @@ export default class BrakeClient {
                     }
 
                     return response;
-                }, fallback, options);
+                }, fallback ? function (...params) {
+                    return fallback(...params);
+                } : undefined, options);
 
                 let response = await circuit.exec(request);
 
@@ -80,11 +82,15 @@ export default class BrakeClient {
     }
 
     fallback(callback) {
-        return this.brakes.fallback(callback);
+        return this.brakes.fallback(function (...params) {
+            return callback(...params);
+        });
     }
 
     healthCheck(callback) {
-        return this.brakes.healthCheck(callback);
+        return this.brakes.healthCheck(function (...params) {
+            return callback(...params);
+        });
     }
 
     /**

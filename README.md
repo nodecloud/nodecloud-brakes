@@ -11,7 +11,15 @@ const SERVICE_NAME = 'a-service';
 const brake = new BrakeClient(SERVICE_NAME);
 
 //set health check.
-brake.healthCheck(resourceInterface.checkHealth);
+brake.healthCheck(() => {
+  return rp({
+      method: 'get',
+      url: `/${SERVICE_NAME}/health`,
+      headers: {
+          'Content-Type': 'application/json'
+      }
+  });
+});
 
 brake.on('circuitOpen', () => {
     logger.warn(`The service: ${SERVICE_NAME}'s circuit is opened.`);
@@ -24,16 +32,6 @@ brake.on('circuitClosed', () => {
 brake.fallback(err => {
     throw new Error('Cannot invoke downstream service. please try again soon.', err);
 });
-
-export function checkHealth() {
-    return rp({
-        method: 'get',
-        url: `/${SERVICE_NAME}/health`,
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    });
-}
 
 export function getResource(id) {
     const request = {
@@ -88,8 +86,10 @@ Return the circuit's status.
 
 ### brake.circuit(client, fallback, options) : {send(request)}
 
-* client: {send() {}}
-* fallback(err)
-* options the same as [brakes](https://github.com/node-cloud/brakes).
+* client:   (required) an object implement send function.
+* fallback: (optional) fallback function.
+* options   (optional) the same as [brakes](https://github.com/node-cloud/brakes).
 
 ### brake.fallback(callback)
+
+* fallback: (optional) the global fallback function.
