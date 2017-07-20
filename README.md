@@ -1,20 +1,20 @@
-# cloud-client
+# NodeCloud-Brake-Client
 
 ## Usage
 
-### ResourceClient
+### UserClient
 ``` javascript
 import BrakeClient from 'brake-client';
 import rp from 'request-promise';
 
-const SERVICE_NAME = 'a-service';
+const SERVICE_NAME = 'user-service';
 const brake = new BrakeClient(SERVICE_NAME);
 
 //set health check.
 brake.healthCheck(() => {
   return rp({
       method: 'get',
-      url: `/${SERVICE_NAME}/health`,
+      url: `/health`,
       headers: {
           'Content-Type': 'application/json'
       }
@@ -33,11 +33,11 @@ brake.fallback(err => {
     throw new Error('Cannot invoke downstream service. please try again soon.', err);
 });
 
-export function getResource(id) {
+export function getUser(userId) {
     const request = {
         method: 'get',
-        url: `/${SERVICE_NAME}/v1/resources/:id`,
-        params: {id: id},
+        url: `/v1/users/:userId`,
+        params: {userId: userId},
         headers: {
             'Content-Type': 'application/json'
         }
@@ -49,10 +49,10 @@ export function getResource(id) {
 You can use brake client to invoke resource api. The example is
 
 ``` javascript
-import resourceClient from './ResourceClient';
+import * as userClient from './UserClient';
 
-resourceClient.getResource(id).then(resource => {
-    console.log(resource);
+userClient.getUser(1).then(user => {
+    console.log(user);
 })
 ```
 
