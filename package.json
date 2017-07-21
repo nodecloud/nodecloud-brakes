@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/node-cloud/cloud-client.git"
+    "url": "git+https://github.com/nodecloud/nodecloud-brakes.git"
   },
   "keywords": [
     "circuit",
@@ -19,9 +19,9 @@
   "author": "miaowing <i@zfeng.net>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/node-cloud/cloud-client/issues"
+    "url": "https://github.com/nodecloud/nodecloud-brakes/issues"
   },
-  "homepage": "https://github.com/node-cloud/cloud-client#readme",
+  "homepage": "https://github.com/nodecloud/nodecloud-brakes#readme",
   "dependencies": {
     "brakes": "git+https://github.com/node-cloud/brakes.git",
     "loadbalance": "git+https://github.com/node-cloud/node-loadbalance.git",
