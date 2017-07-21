@@ -1,10 +1,10 @@
-# NodeCloud-Brake-Client
+# NodeCloud-Brakes
 
 ## Usage
 
 ### UserClient
 ``` javascript
-import BrakeClient from 'brake-client';
+import BrakeClient from 'nodecloud-brakes';
 import rp from 'request-promise';
 
 const SERVICE_NAME = 'user-service';
